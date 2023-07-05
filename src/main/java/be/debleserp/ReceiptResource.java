@@ -8,11 +8,11 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.resteasy.reactive.RestForm;
 
 import java.io.File;
-import java.io.IOException;
 
 @Path("/receipt")
 public class ReceiptResource {
@@ -25,16 +25,22 @@ public class ReceiptResource {
     @Path("/upload")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
-    public String uploadReceipt(@RestForm File file) {
+    public Response uploadReceipt(@RestForm File file) {
         try {
             APIRequest googleAPIRequest = new APIRequest(file);
 
             APIResponse visionResponse = cloudVisionAPI.processRequest(googleAPIRequest);
 
-            return "SUCCESSg";
+            return Response.status(Response.Status.OK)
+                    .entity("Receipt uploaded successfully")
+                    .type(MediaType.TEXT_PLAIN)
+                    .build();
         } catch (Exception e) {
             e.printStackTrace();
-            return "ERROR";
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Error")
+                    .type(MediaType.TEXT_PLAIN)
+                    .build();
         }
     }
 }
