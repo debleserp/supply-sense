@@ -3,16 +3,14 @@ package be.debleserp;
 import be.debleserp.model.APIRequest;
 import be.debleserp.model.APIResponse;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.resteasy.reactive.RestForm;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 
 @Path("/receipt")
 public class ReceiptResource {
@@ -22,7 +20,7 @@ public class ReceiptResource {
     CloudVisionAPI cloudVisionAPI;
 
     @POST
-    @Path("/upload")
+    @Path("/uploadFile")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public Response uploadReceipt(@RestForm File file) {
@@ -37,10 +35,36 @@ public class ReceiptResource {
                     .build();
         } catch (Exception e) {
             e.printStackTrace();
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Error")
-                    .type(MediaType.TEXT_PLAIN)
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("An unknown error occurred: " + e.getMessage())
                     .build();
         }
     }
+
+    @POST
+    @Path("/uploadFilepath")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response uploadReceipt(@RestForm String filePath) {
+        try {
+            APIRequest googleAPIRequest = new APIRequest(filePath);
+
+            APIResponse visionResponse = cloudVisionAPI.processRequest(googleAPIRequest);
+
+            return Response.status(Response.Status.OK)
+                    .entity("Receipt uploaded successfully")
+                    .type(MediaType.TEXT_PLAIN)
+                    .build();
+        } catch (FileNotFoundException fileNotFoundException){
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(fileNotFoundException.getMessage())
+                    .type(MediaType.TEXT_PLAIN)
+                    .build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("An unknown error occurred: " + e.getMessage())
+                    .build();
+        }
+    }
+
 }
