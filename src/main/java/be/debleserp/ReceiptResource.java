@@ -31,7 +31,7 @@ public class ReceiptResource {
 
             APIResponse visionResponse = cloudVisionAPI.processRequest(googleAPIRequest);
 
-            return "SUCCES";
+            return "SUCCESSg";
         } catch (Exception e) {
             e.printStackTrace();
             return "ERROR";
