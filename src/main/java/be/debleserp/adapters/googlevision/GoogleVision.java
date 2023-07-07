@@ -15,13 +15,10 @@ import java.util.List;
 public class GoogleVision implements ExtractorService {
     Receipt createDummyReceipt(){
         ReceiptItem receiptItem = new ReceiptItem("Water", 6, 1);
-
         return new Receipt(LocalDateTime.now(), "Colruyt", List.of(receiptItem));
     }
     @Override
     public Receipt processRequest(ScannedReceipt scannedReceipt) {
         return createDummyReceipt();
     }
-
-
 }
